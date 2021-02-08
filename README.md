@@ -1,6 +1,6 @@
 ## Programming Technologies
 ### Task 9. Synchronized.
->Write a text chat for two users on sockets. The chat should be implemented on a client-server basis. One user is on the server, the other on the client. Addresses and ports are set via the command line: client --- where to connect, server --- which port to listen on. At startup, a text prompt is displayed in which you can reach one of the following commands: 
+>Write a text chat for two users on sockets. The chat should be implemented on a client-server basis. One user is on the server, the other on the client. Addresses and ports are set via the command line: client --- where to connect, server --- which port to listen on. At startup, a text prompt is displayed in which you can reach one of the following commands:  
 -Set username (**@ name Vasya**)  
 -Send a text message (**Hello**)  
 -Exit (**@quit**)  
