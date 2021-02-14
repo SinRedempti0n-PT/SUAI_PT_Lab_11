@@ -3,3 +3,6 @@ run.sh
 bin/*
 run_server.sh
 run_client.sh
+/.idea/
+/out/
+/Programming_Technology_11.iml

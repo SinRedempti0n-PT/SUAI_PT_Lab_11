@@ -1,14 +1,15 @@
 package com.sinredemption;
 
-import java.util.Scanner;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.nio.charset.StandardCharsets;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.File;
+
+import java.io.*;
+import java.net.*;
+import java.nio.ByteBuffer;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Scanner;
+import java.nio.charset.StandardCharsets;
 
 
 
@@ -17,9 +18,7 @@ public class Chat extends Thread{
     private String username;
     private InetAddress targetIp;
     private int port;
-    private byte[] buf = new byte[1024];;
-    private int bufferSize = 64000;
-
+    private byte[] buf = new byte[1024];
     public class Receiver extends Thread{
 
         public void run(){
@@ -28,16 +27,16 @@ public class Chat extends Thread{
                     DatagramPacket packet = new DatagramPacket(buf, buf.length);
                     socket.receive(packet);
                     String received = new String(packet.getData(), 0, packet.getLength());
-                    String[] cmd = received.split(" ", 4);
-                    // System.out.println(cmd[0]);
-                    if(cmd[1].equals("<file>")){
-                        try {
-                            FileOutputStream fileOutputStream = new FileOutputStream("recieved_"+cmd[2]);
-                            fileOutputStream.write(cmd[3].getBytes(), 0, bufferSize);
-                            fileOutputStream.close();
-                        } catch (Exception e) {
-                            //TODO: handle exception
+                    String[] cmd = received.split(" ", 3);
+                    if(cmd[0].equals("<file>")){
+                        Path filePath = Path.of(new File(cmd[1]).getName());
+                        long filesize = Integer.parseInt(cmd[2]);
+                        OutputStream writer = Files.newOutputStream(filePath);
+                        for(int i = 0; i < filesize; i = i + buf.length){
+                            socket.receive(packet);
+                            writer.write(packet.getData(), 0, buf.length);
                         }
+                        System.err.println("File received: " + filePath.getName(0));
                     }else
                         System.out.println(received);
                 }catch (Exception e){
@@ -48,19 +47,7 @@ public class Chat extends Thread{
     }
 
     public class Sender extends Thread{
-        
-        private String fileReader(String filename){
-            byte buffer[] = new byte[bufferSize];
-            try{
-                FileInputStream inputStream = new FileInputStream(filename);
-                while (inputStream.available() > 0) 
-                    inputStream.read(buffer, 0, bufferSize);
-            }catch (Exception e){
-                System.err.println(e.getCause());
-            }
-            System.out.println(buffer.toString());
-            return ("<file> " + filename + " " + buffer.toString());
-        }
+
 
         public void run(){
             Scanner console = new Scanner(System.in);
@@ -68,15 +55,29 @@ public class Chat extends Thread{
                 try {
 
                     String tmp = console.nextLine();
-                    if(tmp.charAt(0) == '@'){
+                    if(tmp.charAt(0) == '@' && !tmp.equals("\n")){
                         String[] cmd = tmp.split(" ", 3);
                         if(cmd[0].equals("@quit")) {
                             System.exit(1);
                         } else if(cmd[0].equals("@name"))
                             username = cmd[1];
-                        else if(cmd[0].equals("@file"))
-                            sendMessage(fileReader(cmd[1]));
-                        else HelpMsg();
+                        else if(cmd[0].equals("@file")){
+                            try {
+                                Path filePath = Path.of(cmd[1]);
+                                long fileSize = Files.size(filePath);
+                                byte[] sendfile  = new String("<file> " + new File(cmd[1]).getName() + " "+ fileSize).getBytes();
+                                DatagramPacket packet = new DatagramPacket(sendfile, sendfile.length, targetIp, port);
+                                socket.send(packet);
+                                InputStream reader = Files.newInputStream(filePath);
+                                for(int i = 0; i < fileSize; i = i + buf.length){
+                                    reader.read(buf, 0, buf.length);
+                                    packet = new DatagramPacket(buf, buf.length, targetIp, port);
+                                    socket.send(packet);
+                                }
+                            }catch (Exception e){
+                                System.err.println(e.getCause());
+                            }
+                        }else HelpMsg();
                     }else
                         sendMessage(tmp);
                 }catch (Exception e){
