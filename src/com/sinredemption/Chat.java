@@ -6,12 +6,19 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.File;
+
+
+
 public class Chat extends Thread{
     private DatagramSocket socket;
     private String username;
     private InetAddress targetIp;
     private int port;
     private byte[] buf = new byte[1024];;
+    private int bufferSize = 64000;
 
     public class Receiver extends Thread{
 
@@ -21,7 +28,18 @@ public class Chat extends Thread{
                     DatagramPacket packet = new DatagramPacket(buf, buf.length);
                     socket.receive(packet);
                     String received = new String(packet.getData(), 0, packet.getLength());
-                    System.out.println(received);
+                    String[] cmd = received.split(" ", 4);
+                    // System.out.println(cmd[0]);
+                    if(cmd[1].equals("<file>")){
+                        try {
+                            FileOutputStream fileOutputStream = new FileOutputStream("recieved_"+cmd[2]);
+                            fileOutputStream.write(cmd[3].getBytes(), 0, bufferSize);
+                            fileOutputStream.close();
+                        } catch (Exception e) {
+                            //TODO: handle exception
+                        }
+                    }else
+                        System.out.println(received);
                 }catch (Exception e){
                     System.err.println(e);
                 }
@@ -30,6 +48,19 @@ public class Chat extends Thread{
     }
 
     public class Sender extends Thread{
+        
+        private String fileReader(String filename){
+            byte buffer[] = new byte[bufferSize];
+            try{
+                FileInputStream inputStream = new FileInputStream(filename);
+                while (inputStream.available() > 0) 
+                    inputStream.read(buffer, 0, bufferSize);
+            }catch (Exception e){
+                System.err.println(e.getCause());
+            }
+            System.out.println(buffer.toString());
+            return ("<file> " + filename + " " + buffer.toString());
+        }
 
         public void run(){
             Scanner console = new Scanner(System.in);
@@ -43,6 +74,8 @@ public class Chat extends Thread{
                             System.exit(1);
                         } else if(cmd[0].equals("@name"))
                             username = cmd[1];
+                        else if(cmd[0].equals("@file"))
+                            sendMessage(fileReader(cmd[1]));
                         else HelpMsg();
                     }else
                         sendMessage(tmp);
