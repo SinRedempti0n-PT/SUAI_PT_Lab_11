@@ -4,7 +4,11 @@
 -Set username (**@ name Vasya**)  
 -Send a text message (**Hello**)  
 -Exit (**@quit**)  
-Received messages are automatically displayed. The program works over the **UDP protocol**. 
+Received messages are automatically displayed. The program works over the **UDP protocol**.
+
+
+Additional task
+>File sending
 ---
 ### Задание 9. Synchronized.
 >Написать текстовый чат для двух пользователей на сокетах. Чат должен быть реализован по принципу клиент-сервер. Один пользователь находится на сервере, второй --- на клиенте. Адреса и порты задаются через командную строку: клиенту --- куда соединяться, серверу --- на каком порту слушать. При старте программы выводится текстовое приглашение, в котором можно ввести одну из следующих команд:  
@@ -12,4 +16,7 @@ Received messages are automatically displayed. The program works over the **UDP 
 -Послать текстовое сообщение (**Hello**)  
 -Выход (**@quit**)  
 Принятые сообщения автоматически выводятся на экран. Программа работает по протоколу **UDP**.
+
+Дополнительное задание
+>Отправка файлов
 
