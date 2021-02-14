@@ -7,7 +7,7 @@
 Received messages are automatically displayed. The program works over the **UDP protocol**.
 
 
-Additional task
+#### Additional task
 >File sending
 ---
 ### Задание 9. Synchronized.
@@ -17,6 +17,6 @@ Additional task
 -Выход (**@quit**)  
 Принятые сообщения автоматически выводятся на экран. Программа работает по протоколу **UDP**.
 
-Дополнительное задание
+#### Дополнительное задание
 >Отправка файлов
 
